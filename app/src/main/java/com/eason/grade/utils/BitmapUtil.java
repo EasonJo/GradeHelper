@@ -37,7 +37,9 @@ public class BitmapUtil {
      * 生成图片
      */
     public static Bitmap stringListtoBitmap(Context context, ArrayList<StringBitmapParameter> AllString) {
-        if (AllString.size() <= 0) return Bitmap.createBitmap(WIDTH, WIDTH / 4, Bitmap.Config.RGB_565);
+        if (AllString.size() <= 0) {
+            return Bitmap.createBitmap(WIDTH, WIDTH / 4, Bitmap.Config.RGB_565);
+        }
         ArrayList<StringBitmapParameter> mBreakString = new ArrayList<>();
 
         Paint paint = new Paint();
@@ -109,7 +111,7 @@ public class BitmapUtil {
                 x = (WIDTH - paint.measureText(str)) / 2.0f;
             }
 
-            if (str.isEmpty() | str.contains("\n") | mParameter.getIsSmallOrLarge() == IS_LARGE) {
+            if ((str != null && str.isEmpty()) | str.contains("\n") | mParameter.getIsSmallOrLarge() == IS_LARGE) {
                 canvas.drawText(str, x, y + FontHeight / 2, paint);
                 y = y + FontHeight;
             } else {
@@ -117,7 +119,8 @@ public class BitmapUtil {
             }
             y = y + FontHeight;
         }
-        canvas.save(Canvas.ALL_SAVE_FLAG);
+//        canvas.save(Canvas.ALL_SAVE_FLAG);
+        canvas.save();
         canvas.restore();
         return bitmap;
     }
