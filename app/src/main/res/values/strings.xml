@@ -11,4 +11,7 @@
     <string name="not_read">未朗读</string>
 
     <string name="tips">第一步:如果没有班级,请先录入班级\n第二步:选择班级,导入学生,如果没有班级,请在最上面手动录入一个班级.\nExcel的格式必须正确.否则会导致解析失败.</string>
+    <string name="cj_data">成绩单</string>
+    <string name="bt_import_class_grade">导出成绩</string>
+    <string name="choose_classes">班级</string>
 </resources>

@@ -8,14 +8,30 @@
         tools:context=".fragment.ClassesFragment"
 >
 
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+
+              app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+              android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="8dp"
+              app:layout_constraintTop_toTopOf="parent" android:id="@+id/textView8" android:text="@string/cj_data"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/choose_classes" android:id="@+id/textView9"
+              android:textSize="24sp"
+              app:layout_constraintEnd_toStartOf="@+id/choose_class_spinner"
+              app:layout_constraintStart_toStartOf="parent"
+              android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+              app:layout_constraintTop_toTopOf="@+id/choose_class_spinner"
+              app:layout_constraintBottom_toBottomOf="@+id/choose_class_spinner"/>
+
     <org.angmarch.views.NiceSpinner
             android:id="@+id/choose_class_spinner"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/chooseData" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp"/>
+            app:layout_constraintTop_toBottomOf="@+id/chooseData"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toEndOf="@+id/textView9"
+            android:layout_marginStart="8dp"/>
 
     <android.support.v7.widget.RecyclerView
 
@@ -40,11 +56,11 @@
             android:text="选择成绩日期"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/chooseData" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp"/>
+            android:id="@+id/chooseData"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/textView8"/>
     <Button
-            android:text="导出当前成绩"
+            android:text="@string/bt_import_class_grade"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/export"
@@ -56,8 +72,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/openDir"
-            app:layout_constraintBaseline_toBaselineOf="@+id/export"
-            android:visibility="gone" tools:layout_editor_absoluteX="180dp"/>
+            android:visibility="gone" android:layout_marginTop="29dp"
+            android:layout_marginBottom="23dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/export" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
