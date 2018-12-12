@@ -170,17 +170,18 @@ public class BitmapUtil {
      * 保存文件到指定路径
      *
      * @param context
-     * @param bmp
+     * @param fileName 导出图片文件名称
+     * @param bmp 图片
      * @return
      */
-    public static boolean saveImageToGallery(Context context, Bitmap bmp) {
+    public static boolean saveImageToGallery(Context context, String fileName, Bitmap bmp) {
         // 首先保存图片
         String storePath = FileUtils.getAppStorageDir();
         File appDir = new File(storePath);
         if (!appDir.exists()) {
             appDir.mkdir();
         }
-        String fileName = System.currentTimeMillis() + ".jpg";
+        fileName += ".jpg";
         File file = new File(appDir, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);

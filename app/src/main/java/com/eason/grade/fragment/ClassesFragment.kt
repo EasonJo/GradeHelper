@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.text.Html
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -131,8 +132,12 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
                 }
 
                 val classes = allClasses[choose_class_spinner.selectedIndex]
+                val str =
+                    Html.fromHtml(
+                        "确认导出 <font color='#ff0000'><big><big>${classes.name} ${data_info.text}</big></big></font> 的成绩单?"
+                    )
                 MaterialDialog.Builder(context!!).title("导出成绩")
-                    .content("确认导出 ${classes.name}-${data_info.text} 成绩单?")
+                    .content(str)
                     .positiveText("确认")
                     .negativeText("取消")
                     .onPositive { _, _ ->
@@ -181,7 +186,7 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             val gradeOfClasses = getGradeOfClasses(allClasses[choose_class_spinner.selectedIndex])
             FileUtils.createDir(FileUtils.getAppStorageDir())
             val fileName =
-                "${FileUtils.getAppStorageDir()}/${allClasses[choose_class_spinner.selectedIndex].name}-${data_info.text}.xls"
+                "${FileUtils.getAppStorageDir()}/${allClasses[choose_class_spinner.selectedIndex].name}_${data_info.text}.xls"
             val initExcel = ExcelUtils.initExcel(fileName, columns, sheetName)
 
             if (!initExcel) {
@@ -207,7 +212,7 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             r && r_bitmap
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                val str = if (it) "导出成功,文件目录为:${FileUtils.getAppStorageDir()}" else "导出失败"
+                val str = if (it) "导出成功,目录:${FileUtils.getAppStorageDir()}" else "导出失败"
                 info.text = str
                 context?.showLongToast(str)
             }, {
@@ -215,13 +220,13 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             })
     }
 
-
     private fun generateBitmap(objList: List<ExcelBean>, title: String): Boolean {
         val list = objList.map { StringBitmapParameter("${it.sid}  ${it.name} ${it.isRight} ${it.isRead}") }
                 as ArrayList<StringBitmapParameter>
         list.add(0, StringBitmapParameter(title))
         val bitmap = BitmapUtil.stringListtoBitmap(context, list)
-        return BitmapUtil.saveImageToGallery(context, bitmap)
+        val fileName = "${allClasses[choose_class_spinner.selectedIndex].name}_${data_info.text}"
+        return BitmapUtil.saveImageToGallery(context, fileName, bitmap)
     }
 
     companion object {
