@@ -1,13 +1,13 @@
 package com.eason.grade.students;
 
+import com.eason.grade.bean.gen.ClassesDao;
+import com.eason.grade.bean.gen.DaoSession;
+import com.eason.grade.bean.gen.StudentDao;
+import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToOne;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
-import com.eason.grade.bean.gen.DaoSession;
-import com.eason.grade.bean.gen.ClassesDao;
-import com.eason.grade.bean.gen.StudentDao;
 
 /**
  * Student bean
@@ -20,7 +20,7 @@ public class Student {
     /**
      * stu number
      */
-    @Id
+    @Id(autoincrement = true)
     private Long sid;
 
     /**
@@ -41,11 +41,15 @@ public class Student {
     @ToOne(joinProperty = "cid")
     private Classes classes;
 
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 1943931642)
     private transient StudentDao myDao;
 
@@ -96,7 +100,9 @@ public class Student {
     @Generated(hash = 929604645)
     private transient Long classes__resolvedKey;
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 223583781)
     public Classes getClasses() {
         Long __key = this.cid;
@@ -115,7 +121,9 @@ public class Student {
         return classes;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 168680912)
     public void setClasses(Classes classes) {
         synchronized (this) {
@@ -161,7 +169,9 @@ public class Student {
         myDao.update(this);
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1701634981)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
@@ -175,7 +185,7 @@ public class Student {
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", cid=" + cid +
-               // ", classes=" + classes +
+                // ", classes=" + classes +
                 '}';
     }
 }

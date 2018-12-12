@@ -1,13 +1,10 @@
 package com.eason.grade.students;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.ToOne;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
 import com.eason.grade.bean.gen.DaoSession;
-import com.eason.grade.bean.gen.StudentDao;
 import com.eason.grade.bean.gen.GradeDao;
+import com.eason.grade.bean.gen.StudentDao;
+import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.*;
 
 /**
  * Grade bean
@@ -22,7 +19,9 @@ public class Grade {
     @Id(autoincrement = true)
     private Long id;
 
+    @Unique
     private Long sid;
+
     /**
      * {@link Student}
      */
@@ -41,17 +40,21 @@ public class Grade {
      */
     private boolean isRead;
 
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 681281562)
     private transient GradeDao myDao;
 
     @Generated(hash = 1858694189)
     public Grade(Long id, Long sid, String gradeName, boolean isRight,
-            boolean isRead) {
+                 boolean isRead) {
         this.id = id;
         this.sid = sid;
         this.gradeName = gradeName;
@@ -106,7 +109,9 @@ public class Grade {
     @Generated(hash = 79695740)
     private transient Long student__resolvedKey;
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 906694816)
     public Student getStudent() {
         Long __key = this.sid;
@@ -171,11 +176,24 @@ public class Grade {
         myDao.update(this);
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1187286414)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getGradeDao() : null;
     }
 
+    @Override
+    public String toString() {
+        return "Grade{" +
+                "id=" + id +
+                ", sid=" + sid +
+                ", student=" + student +
+                ", gradeName='" + gradeName + '\'' +
+                ", isRight=" + isRight +
+                ", isRead=" + isRead +
+                '}';
+    }
 }

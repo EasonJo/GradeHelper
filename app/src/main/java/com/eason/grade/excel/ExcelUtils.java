@@ -74,21 +74,26 @@ public class ExcelUtils {
      * @param colName   列名
      * @param sheetName sheet 名字
      */
-    public static boolean initExcel(String fileName, String[] colName, String sheetName) {
+    public static boolean initExcel(String fileName, String[] colName, String[] sheetName) {
         format();
         WritableWorkbook workbook = null;
         try {
             File file = new File(fileName);
             if (!file.exists()) {
-                file.createNewFile();
+                boolean r = file.createNewFile();
+                if (!r) {
+                    return false;
+                }
             }
             workbook = Workbook.createWorkbook(file);
-            WritableSheet sheet = workbook.createSheet(sheetName, 0);
-            sheet.addCell((WritableCell) new Label(0, 0, fileName,
-                    arial14format));
-            for (int col = 0; col < colName.length; col++) {
-                sheet.addCell(new Label(col, 0, colName[col], arial10format));
+            for (int i = 0; i < sheetName.length; i++) {
+                WritableSheet sheet = workbook.createSheet(sheetName[i], i);
+                sheet.addCell((WritableCell) new Label(0, 0, fileName, arial14format));
+                for (int col = 0; col < colName.length; col++) {
+                    sheet.addCell(new Label(col, 0, colName[col], arial10format));
+                }
             }
+
             workbook.write();
             return true;
         } catch (Exception e) {
@@ -129,7 +134,7 @@ public class ExcelUtils {
 
     @SuppressWarnings("unchecked")
     public static <T> boolean writeObjListToExcel(List<T> objList,
-                                                  String fileName, Context c) {
+                                                  String fileName, Context c, int sheetIndex) {
         if (objList != null && objList.size() > 0) {
             WritableWorkbook writebook = null;
             InputStream in = null;
@@ -140,7 +145,7 @@ public class ExcelUtils {
                 Workbook workbook = Workbook.getWorkbook(in);
                 writebook = Workbook.createWorkbook(new File(fileName),
                         workbook);
-                WritableSheet sheet = writebook.getSheet(0);
+                WritableSheet sheet = writebook.getSheet(sheetIndex);
                 for (int j = 0; j < objList.size(); j++) {
                     Object[] objs = parseObjFieldValue(objList.get(j));
                     for (int i = 0; i < objs.length; i++) {

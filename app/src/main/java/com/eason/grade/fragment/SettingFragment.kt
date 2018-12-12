@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.eason.grade.BaseApplication
 import com.eason.grade.R
@@ -40,6 +39,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
     private var listener: OnFragmentInteractionListener? = null
     private var allClasses: List<Classes> = mutableListOf()
     private lateinit var classAdapter: ArrayAdapter<String>
+    private lateinit var stuAdapter: ArrayAdapter<String>
 
     override fun getLayout(): Int = R.layout.fragment_setting
 
@@ -52,6 +52,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
         super.onActivityCreated(savedInstanceState)
         confirm.setOnClickListener(this)
         import_data.setOnClickListener(this)
+        insertOne.setOnClickListener(this)
         classes_setting_spinner.setOnItemSelectedListener(this)
 
 
@@ -62,6 +63,10 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             class_name.setAdapter(classAdapter)
             classes_setting_spinner.attachDataSource(allClasses.map { it.name })
 
+            stuAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
+                allClasses[classes_setting_spinner.selectedIndex].students.map { it.name })
+
+            insert_stu_name.setAdapter(stuAdapter)
             //classes_setting_spinner.text = ""
         }
     }
@@ -83,6 +88,57 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                     chooseFile()
                 }
             }
+            insertOne -> {
+                val name = insert_stu_name.text
+                if (TextUtils.isEmpty(name)) {
+                    context?.showToast("录入名字不能为空")
+                    return
+                }
+
+                if (allClasses.isEmpty() || classes_setting_spinner.selectedIndex >= allClasses.size) {
+                    context?.showToast("必须先选择班级,否则不能导入学生信息")
+                    return
+                }
+
+                if (info.text.startsWith("第一")) {
+                    info.text = emptyString
+                }
+
+                val stus = allClasses[classes_setting_spinner.selectedIndex].students.map { it.name }
+                if (stus.contains(name.toString())) {
+                    //有重名
+                    val fromHtml =
+                        Html.fromHtml(
+                            "<font color='#ff0000'><big><big>$name</big></big></font><br>已经存在." +
+                                    "如果继续录入,将生成一个同名学生."
+                        )
+                    MaterialDialog.Builder(context!!).title("学生信息导入成功")
+                        .content(fromHtml)
+                        .positiveText("确认")
+                        .negativeText("取消")
+                        .onPositive { _, _ ->
+                            //info.text = emptyString
+                            val stu = Student().apply {
+                                this.name = name.toString()
+                                this.cid = allClasses[classes_setting_spinner.selectedIndex].id
+                            }
+                            insertStu(stu)
+                            RxBus.get().post(EventOnStudenImport())
+                        }.onNegative { _, _ ->
+                            //do nothing
+                        }.show()
+                } else {
+                    //无重名.直接录入
+                    val stu = Student().apply {
+                        this.name = name.toString()
+                        this.cid = allClasses[classes_setting_spinner.selectedIndex].id
+                    }
+                    insertStu(stu)
+                    //更新输入框的 UI
+                    allClasses[classes_setting_spinner.selectedIndex].resetStudents()
+                    updateStudentsOfClass2InputView(allClasses[classes_setting_spinner.selectedIndex])
+                }
+            }
         }
     }
 
@@ -90,7 +146,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
     private fun saveClass(className: String) {
         val classes = classesDao.queryBuilder().where(ClassesDao.Properties.Name.eq(className)).build().unique()
         if (classes != null) {
-            Toast.makeText(context, "班级已经存在,请勿重复录入", Toast.LENGTH_SHORT).show()
+            context?.showToast("班级已经存在,请勿重复录入")
         } else {
 
             Classes().apply {
@@ -102,6 +158,14 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             context?.showToast("班级录入成功")
             import_data.isEnabled = true
         }
+    }
+
+    private fun insertStu(stu: Student) {
+        val id = studentDao.insertOrReplace(stu)
+        RxBus.get().post(EventOnStudenImport())
+        val student = studentDao.load(id)
+        info.append("${stu.name} 插入成功,ID: ${student.sid}\n")
+        context?.showToast("${stu.name} 插入成功")
     }
 
     private fun chooseFile() {
@@ -117,7 +181,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             Log.e(TAG, "选择的文件Uri = " + data.toString());
             //通过Uri获取真实路径
             val excelPath = FileUtils.getFilePathByUri(context, data.data)
-            Log.e(TAG, "excelPath = " + excelPath)//    /storage/emulated/0/test.xls
+            Log.e(TAG, "excelPath = $excelPath")
             if (excelPath.contains(".xls") || excelPath.contains(".xlsx")) {
                 context?.showToast("正在加载Excel中...")
                 //载入excel
@@ -139,9 +203,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             }
                 .map { strings ->
                     Student().apply {
-                        sid = strings[0].toLong()
                         name = strings[1]
-                        //setClasses(classes)
                     }
                 }
             list
@@ -151,26 +213,36 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             .subscribe({
                 info.append("Excel 解析成功\n")
                 context?.showToast("Excel 解析成功")
-
-                //classesDao.insertOrReplace(classes)
-
-                //classes.students = it
                 val chooseClass = allClasses[classes_setting_spinner.selectedIndex]
-
-                val fromHtml =
+                val students1 = chooseClass.students
+                val fromHtml = if (students1.isNotEmpty())
+                    Html.fromHtml(
+                        "<font color='#ff0000'><big><big>${chooseClass.name}</big></big></font> 班级已有学生," +
+                                "如果继续录入,将清空原有学生,并且学生成绩也将丢失,可以选择手动一个个录入."
+                    )
+                else
                     Html.fromHtml(
                         "此学生信息将录入以下班级<br><font color='#ff0000'><big><big>${chooseClass.name}</big></big></font><br>录入请点确认,将插入数据库." +
                                 "请勿选错班级,否则会导致学生班级信息全部变更"
                     )
 
-                MaterialDialog.Builder(context!!).title("学生信息导入成功")
+                MaterialDialog.Builder(context!!).title("学生信息解析成功")
                     .content(fromHtml)
                     .positiveText("确认")
                     .negativeText("取消")
                     .onPositive { _, _ ->
+
+                        //先删除这个班级的所有学生
+//                        val students =
+//                            studentDao.queryBuilder().where(StudentDao.Properties.Cid.eq(chooseClass.id)).build().list()
+                        studentDao.deleteInTx(students1)
+
+                        //重新插入学生信息,学生学号会发生变化,学生的成绩也会丢失
                         it.forEach { t: Student -> t.cid = chooseClass.id }
                         studentDao.insertOrReplaceInTx(it)
+                        updateStudentsOfClass2InputView(chooseClass)
                         info.text = emptyString
+                        insert_stu_name.setText(emptyString)
                         info.append("用户数据导入成功\n")
                         context?.showToast("用户数据导入成功")
                         RxBus.get().post(EventOnStudenImport())
@@ -195,12 +267,24 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
         classes_setting_spinner.attachDataSource(allClasses.map { it.name })
     }
 
+    private fun updateStudentsOfClass2InputView(cls: Classes) {
+        cls.resetStudents()
+        //更新输入学生的名字
+        stuAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, cls.students.map { it.name })
+        insert_stu_name.setAdapter(stuAdapter)
+    }
+
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         import_data.isEnabled = true
+
+        if (allClasses.isNotEmpty()) {
+            val cls = allClasses[classes_setting_spinner.selectedIndex]
+            updateStudentsOfClass2InputView(cls)
+        }
     }
 
     interface OnFragmentInteractionListener {

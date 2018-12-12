@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.eason.grade.R
-import com.eason.grade.students.Classes
 import com.eason.grade.students.Grade
 import kotlinx.android.synthetic.main.fragment_classes.view.*
 
@@ -20,7 +19,7 @@ class MyClassesRecyclerViewAdapter(
 
     init {
         mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as Classes
+            val item = v.tag as Grade
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             mListener?.onListFragmentInteraction(item)
@@ -53,7 +52,7 @@ class MyClassesRecyclerViewAdapter(
     }
 
     interface OnListFragmentInteractionListener {
-        fun onListFragmentInteraction(item: Classes?)
+        fun onListFragmentInteraction(item: Grade?)
     }
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {

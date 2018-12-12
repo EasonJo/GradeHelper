@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_classes_list.*
+import java.io.File
 import java.util.*
 
 
@@ -58,6 +59,9 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
         chooseData.setOnClickListener(this)
         export.setOnClickListener(this)
         openDir.setOnClickListener(this)
+
+        choose_class_spinner.setOnItemSelectedListener(this)
+
         with(list) {
             layoutManager = LinearLayoutManager(context)
             myadapter = MyClassesRecyclerViewAdapter(clas, this@ClassesFragment)
@@ -82,8 +86,6 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
-
-        choose_class_spinner.setOnItemSelectedListener(this)
 
         //获取班级信息
         getAllClassInfo()
@@ -154,10 +156,9 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
     }
 
 
-    override fun onListFragmentInteraction(item: Classes?) {
+    override fun onListFragmentInteraction(item: Grade?) {
         item?.let {
             context?.showToast(it.toString())
-            Log.i(TAG, it.students.toString())
         }
     }
 
@@ -187,7 +188,8 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             FileUtils.createDir(FileUtils.getAppStorageDir())
             val fileName =
                 "${FileUtils.getAppStorageDir()}/${allClasses[choose_class_spinner.selectedIndex].name}_${data_info.text}.xls"
-            val initExcel = ExcelUtils.initExcel(fileName, columns, sheetName)
+
+            val initExcel = ExcelUtils.initExcel(fileName, columns, arrayOf(sheetName))
 
             if (!initExcel) {
                 context?.showToast("初始化Excel文件失败,请检查读写存储卡权限是否正确.")
@@ -208,7 +210,7 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
                 generateBitmap(objList, "${allClasses[choose_class_spinner.selectedIndex].name} ${data_info.text} 成绩单")
             Log.i(TAG, "图片生成: $r_bitmap")
 
-            val r = ExcelUtils.writeObjListToExcel(objList, fileName, context)
+            val r = ExcelUtils.writeObjListToExcel(objList, fileName, context, 0)
             r && r_bitmap
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe({
@@ -220,10 +222,50 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             })
     }
 
+    private fun exportAllGrade2ExcelFile() {
+        val allGrades = gradeDao.loadAll().groupBy { it.student.classes }
+            .map { entry -> mapOf(Pair(entry.key, entry.value.groupBy { it.gradeName })) }
+        allGrades.forEach {
+            for ((classes, grades) in it) {
+                //classes 班级
+                //grades,所有日期的成绩
+                generateFileOfClasses(classes, grades)
+                println(classes.toString())
+                println(grades.toString())
+            }
+
+        }
+    }
+
+    /**
+     * 生成一个班级的所有成绩
+     */
+    private fun generateFileOfClasses(cls: Classes, grades: Map<String, List<Grade>>) {
+        val classesDirName = FileUtils.getAppStorageDir() + File.separator + cls.name
+        val file = File(classesDirName)
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+
+        val fileName = "$classesDirName/${cls.name}.xls"
+        val columns = arrayOf("学号", "姓名", "作业题", "朗读")
+
+        val sheetName = grades.map { it.key }.toTypedArray()
+        Arrays.sort(sheetName)
+
+        ExcelUtils.initExcel(fileName, columns, sheetName)
+
+        for ((index, value) in sheetName.withIndex()) {
+            val g = grades[value]
+            ExcelUtils.writeObjListToExcel(g, fileName, context, index)
+        }
+    }
+
     private fun generateBitmap(objList: List<ExcelBean>, title: String): Boolean {
         val list = objList.map { StringBitmapParameter("${it.sid}  ${it.name} ${it.isRight} ${it.isRead}") }
                 as ArrayList<StringBitmapParameter>
         list.add(0, StringBitmapParameter(title))
+        list.add(1,StringBitmapParameter("学号  姓名  作业题  朗读"))
         val bitmap = BitmapUtil.stringListtoBitmap(context, list)
         val fileName = "${allClasses[choose_class_spinner.selectedIndex].name}_${data_info.text}"
         return BitmapUtil.saveImageToGallery(context, fileName, bitmap)

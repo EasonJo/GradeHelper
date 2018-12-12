@@ -46,26 +46,28 @@ public class BitmapUtil {
         paint.setAntiAlias(false);
         paint.setTextSize(SMALL_TEXT);
 
-        Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/songti.TTF");// 仿宋打不出汉字
+        // 仿宋打不出汉字
+        Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/songti.TTF");
         Typeface font = Typeface.create(typeface, Typeface.NORMAL);
         paint.setTypeface(font);
 
         for (StringBitmapParameter mParameter : AllString) {
-            int ALineLength = paint.breakText(mParameter.getText(), true, WIDTH, null);//检测一行多少字
-            int lenght = mParameter.getText().length();
-            if (ALineLength < lenght) {
+            //检测一行多少字
+            int aLineLength = paint.breakText(mParameter.getText(), true, WIDTH, null);
+            int length = mParameter.getText().length();
+            if (aLineLength < length) {
 
-                int num = lenght / ALineLength;
-                String ALineString;
-                String RemainString;
+                int num = length / aLineLength;
+                String aLineString;
+                String remainString;
 
                 for (int j = 0; j < num; j++) {
-                    ALineString = mParameter.getText().substring(j * ALineLength, (j + 1) * ALineLength);
-                    mBreakString.add(new StringBitmapParameter(ALineString, mParameter.getIsRightOrLeft(), mParameter.getIsSmallOrLarge()));
+                    aLineString = mParameter.getText().substring(j * aLineLength, (j + 1) * aLineLength);
+                    mBreakString.add(new StringBitmapParameter(aLineString, mParameter.getIsRightOrLeft(), mParameter.getIsSmallOrLarge()));
                 }
 
-                RemainString = mParameter.getText().substring(num * ALineLength, mParameter.getText().length());
-                mBreakString.add(new StringBitmapParameter(RemainString, mParameter.getIsRightOrLeft(), mParameter.getIsSmallOrLarge()));
+                remainString = mParameter.getText().substring(num * aLineLength, mParameter.getText().length());
+                mBreakString.add(new StringBitmapParameter(remainString, mParameter.getIsRightOrLeft(), mParameter.getIsSmallOrLarge()));
             } else {
                 mBreakString.add(mParameter);
             }
@@ -73,16 +75,17 @@ public class BitmapUtil {
 
 
         Paint.FontMetrics fontMetrics = paint.getFontMetrics();
-        int FontHeight = (int) Math.abs(fontMetrics.leading) + (int) Math.abs(fontMetrics.ascent) + (int) Math.abs(fontMetrics.descent);
+        int fontHeight = (int) Math.abs(fontMetrics.leading) + (int) Math.abs(fontMetrics.ascent) + (int) Math.abs(fontMetrics.descent);
         y = (int) Math.abs(fontMetrics.leading) + (int) Math.abs(fontMetrics.ascent);
 
         int bNum = 0;
         for (StringBitmapParameter mParameter : mBreakString) {
             String bStr = mParameter.getText();
-            if (bStr.isEmpty() | bStr.contains("\n") | mParameter.getIsSmallOrLarge() == IS_LARGE)
+            if (bStr.isEmpty() | bStr.contains("\n") | mParameter.getIsSmallOrLarge() == IS_LARGE) {
                 bNum++;
+            }
         }
-        Bitmap bitmap = Bitmap.createBitmap(WIDTH, FontHeight * (mBreakString.size() + bNum), Bitmap.Config.RGB_565);
+        Bitmap bitmap = Bitmap.createBitmap(WIDTH, fontHeight * (mBreakString.size() + bNum), Bitmap.Config.RGB_565);
 
         for (int i = 0; i < bitmap.getWidth(); i++) {
             for (int j = 0; j < bitmap.getHeight(); j++) {
@@ -91,11 +94,8 @@ public class BitmapUtil {
         }
 
         Canvas canvas = new Canvas(bitmap);
-
         for (StringBitmapParameter mParameter : mBreakString) {
-
             String str = mParameter.getText();
-
             if (mParameter.getIsSmallOrLarge() == IS_SMALL) {
                 paint.setTextSize(SMALL_TEXT);
 
@@ -112,12 +112,12 @@ public class BitmapUtil {
             }
 
             if ((str != null && str.isEmpty()) | str.contains("\n") | mParameter.getIsSmallOrLarge() == IS_LARGE) {
-                canvas.drawText(str, x, y + FontHeight / 2, paint);
-                y = y + FontHeight;
+                canvas.drawText(str, x, y + fontHeight / 2, paint);
+                y = y + fontHeight;
             } else {
                 canvas.drawText(str, x, y, paint);
             }
-            y = y + FontHeight;
+            y = y + fontHeight;
         }
 //        canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.save();
@@ -171,7 +171,7 @@ public class BitmapUtil {
      *
      * @param context
      * @param fileName 导出图片文件名称
-     * @param bmp 图片
+     * @param bmp      图片
      * @return
      */
     public static boolean saveImageToGallery(Context context, String fileName, Bitmap bmp) {
@@ -196,11 +196,7 @@ public class BitmapUtil {
             //保存图片后发送广播通知更新数据库
             Uri uri = Uri.fromFile(file);
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-            if (isSuccess) {
-                return true;
-            } else {
-                return false;
-            }
+            return isSuccess;
         } catch (IOException e) {
             e.printStackTrace();
         }

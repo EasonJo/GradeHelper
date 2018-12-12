@@ -13,11 +13,9 @@ import com.eason.grade.R
 import com.eason.grade.base.BaseFragment
 import com.eason.grade.bean.gen.ClassesDao
 import com.eason.grade.bean.gen.GradeDao
-import com.eason.grade.bean.gen.StudentDao
 import com.eason.grade.event.EventOnStudenImport
 import com.eason.grade.students.Classes
 import com.eason.grade.students.Grade
-import com.eason.grade.students.Student
 import com.eason.grade.utils.RxBus
 import com.eason.grade.utils.showToast
 import io.reactivex.Observable
@@ -32,9 +30,9 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
     private var grade = Grade()
     private lateinit var gradeDao: GradeDao
     private lateinit var classesDao: ClassesDao
-    private val studentDao: StudentDao = BaseApplication.application.daoSession.studentDao
+    //private val studentDao: StudentDao = BaseApplication.application.daoSession.studentDao
     private var allClasses: List<Classes> = mutableListOf()
-    private var students: List<Student> = mutableListOf()
+    //private var students: List<Student> = mutableListOf()
     private lateinit var studentImportObserver: Observable<EventOnStudenImport>
 
 
@@ -84,35 +82,27 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
         //val list = classesDao.loadAll().map { it.name }.distinct()
 
         if (allClasses.isNotEmpty()) {
-            students = allClasses[classes_spinner.selectedIndex].students
-            students.let {
+            allClasses[classes_spinner.selectedIndex].students.let {
                 if (it.isNotEmpty()) {
                     stus_spinner.attachDataSource(it.map { it1 -> it1.name })
                 }
             }
         }
 
-
         studentImportObserver = RxBus.get().register(EventOnStudenImport::class.java)
         val disposable = studentImportObserver.subscribe {
             allClasses = classesDao.loadAll().distinct()
-            allClasses.let {
-                if (it.isNotEmpty()) {
-                    classes_spinner.attachDataSource(allClasses.map { classes -> classes.name })
+            allClasses.let { it1 ->
+                if (it1.isNotEmpty()) {
+                    classes_spinner?.attachDataSource(it1.map { classes -> classes.name })
                 }
 
                 if (allClasses.isNotEmpty()) {
-                    students = allClasses[classes_spinner.selectedIndex].students
-                    students.let {
-                        if (it.isNotEmpty()) {
-                            stus_spinner.attachDataSource(it.map { it1 -> it1.name })
-                        }
-                    }
+                    loadAllStudents(allClasses[classes_spinner.selectedIndex])
                 }
             }
         }
     }
-
 
     override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
         when (checkedId) {
@@ -147,7 +137,7 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
                     return
                 }
 
-                val student = students.find { it.name == name }
+                val student = allClasses[classes_spinner.selectedIndex].students.find { it.name == name }
 
                 if (student == null) {
                     context?.showToast("此学生不存在,不能录入成绩")
@@ -180,19 +170,21 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
         }
     }
 
-    private fun loadAllStudents(className: String) {
+    private fun loadAllStudents(cls: Classes) {
         checkIn.text = "确认录入成绩"
         //reset Grade Object
         grade = Grade()
         //当前 班级 的所有学生
-        students = allClasses.find { it.name == className }?.students as List<Student>
-        students.let {
+        cls.resetStudents()
+        //students = cls.students
+        cls.students.let {
             if (it.isNotEmpty()) {
                 stus_spinner.isEnabled = true
                 stus_spinner.attachDataSource(it.map { student -> student.name })
             } else {
                 stus_spinner.text = ""
                 stus_spinner.isEnabled = false
+                //stus_spinner.attachDataSource(mutableListOf<String>())
             }
         }
     }
@@ -207,18 +199,18 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         when (parent!!.id) {
-            R.id.classes_spinner -> loadAllStudents(allClasses[position].name)
+            R.id.classes_spinner -> loadAllStudents(allClasses[position])
             R.id.stus_spinner -> {
                 checkIn.text = "确认录入成绩"
                 grade = Grade()
-                if (students.isEmpty()) {
+                if (allClasses[classes_spinner.selectedIndex].students.isEmpty()) {
                     return
                 }
 
                 rg1.clearCheck()
                 readgroup.clearCheck()
 
-                val student = students[position]
+                val student = allClasses[classes_spinner.selectedIndex].students[position]
 
                 Log.i(TAG, "select student: $student")
 

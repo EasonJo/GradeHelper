@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.text.Html
 import android.text.Spanned
-import android.util.Log
 import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.*
@@ -120,24 +119,4 @@ fun String.isNumber(): Boolean {
     val pattern = Pattern.compile("[0-9]*")
     val isNum = pattern.matcher(this)
     return isNum.matches()
-}
-
-/**
- * 校验 GPS 语句合法性
- */
-fun verify(str: String): Boolean {
-    // val str = "\$GPRMC,024813.640,A,3158.4608,N,11848.3737,E,10.05,324.27,150706,,,A*50"
-    return try {
-
-        var sum = 0//$*之间字符的异或值
-        val end = str.indexOf("*")
-        for (i in 1 until end) {
-            sum = sum xor str[i].toInt()
-        }
-        sum %= 65536
-        sum == Integer.parseInt(str.substring(end + 1), 16)
-    } catch (e: Exception) {
-        Log.e("GPSParser", e.message)
-        false
-    }
 }
