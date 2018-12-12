@@ -173,8 +173,8 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
             }
 
             choose_date -> {
-                date_tip.text =
-                        "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH)}-${calendar.get(Calendar.DAY_OF_MONTH)}"
+//                date_tip.text =
+//                        "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.DAY_OF_MONTH)}"
                 dialog.show()
             }
         }
