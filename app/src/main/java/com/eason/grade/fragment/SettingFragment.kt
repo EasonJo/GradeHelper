@@ -121,6 +121,8 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                             val stu = Student().apply {
                                 this.name = name.toString()
                                 this.cid = allClasses[classes_setting_spinner.selectedIndex].id
+                                this.studentNo =
+                                        (allClasses[classes_setting_spinner.selectedIndex].students.size + 1).toString()
                             }
                             insertStu(stu)
                             RxBus.get().post(EventOnStudenImport())
@@ -131,6 +133,9 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                     //无重名.直接录入
                     val stu = Student().apply {
                         this.name = name.toString()
+                        this.studentNo =
+                                (allClasses[classes_setting_spinner.selectedIndex].students.size + 1).toString()
+
                         this.cid = allClasses[classes_setting_spinner.selectedIndex].id
                     }
                     insertStu(stu)
@@ -164,7 +169,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
         val id = studentDao.insertOrReplace(stu)
         RxBus.get().post(EventOnStudenImport())
         val student = studentDao.load(id)
-        info.append("${stu.name} 插入成功,ID: ${student.sid}\n")
+        info.append("${stu.name} 插入成功,学号: ${student.studentNo}\n")
         context?.showToast("${stu.name} 插入成功")
     }
 
@@ -203,6 +208,9 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
             }
                 .map { strings ->
                     Student().apply {
+                        //学号
+                        studentNo = strings[0]
+                        //姓名
                         name = strings[1]
                     }
                 }

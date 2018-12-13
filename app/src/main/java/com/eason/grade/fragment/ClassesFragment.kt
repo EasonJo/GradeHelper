@@ -197,12 +197,12 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
 
             val objList = gradeOfClasses.map {
                 ExcelBean(
-                    it.student.sid,
+                    it.student.studentNo,
                     it.student.name,
                     if (it.isRight) "正确" else "错误",
                     if (it.isRead) "已朗读" else "未朗读"
                 )
-            }.sortedBy { excelBean -> excelBean.sid }
+            }.sortedBy { excelBean -> excelBean.studentNo }
 
             println(objList)
 
@@ -262,10 +262,14 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
     }
 
     private fun generateBitmap(objList: List<ExcelBean>, title: String): Boolean {
-        val list = objList.map { StringBitmapParameter("${it.sid}  ${it.name} ${it.isRight} ${it.isRead}") }
+        val list = objList.map {
+            StringBitmapParameter(
+                "${it.studentNo} ${it.name} ${it.isRight} ${it.isRead}"
+            )
+        }
                 as ArrayList<StringBitmapParameter>
         list.add(0, StringBitmapParameter(title))
-        list.add(1,StringBitmapParameter("学号  姓名  作业题  朗读"))
+        list.add(1, StringBitmapParameter("学号  姓名  作业题  朗读"))
         val bitmap = BitmapUtil.stringListtoBitmap(context, list)
         val fileName = "${allClasses[choose_class_spinner.selectedIndex].name}_${data_info.text}"
         return BitmapUtil.saveImageToGallery(context, fileName, bitmap)

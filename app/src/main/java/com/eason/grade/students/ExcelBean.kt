@@ -5,7 +5,7 @@ package com.eason.grade.students
  * @author Eason
  */
 data class ExcelBean(
-    var sid: Long,
+    var studentNo: String,
     var name: String,
     var isRight: String,
     var isRead: String

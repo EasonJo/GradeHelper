@@ -23,6 +23,8 @@ public class Student {
     @Id(autoincrement = true)
     private Long sid;
 
+    private String studentNo;
+
     /**
      * name
      */
@@ -53,9 +55,10 @@ public class Student {
     @Generated(hash = 1943931642)
     private transient StudentDao myDao;
 
-    @Generated(hash = 1256560117)
-    public Student(Long sid, String name, int age, Long cid) {
+    @Generated(hash = 142132516)
+    public Student(Long sid, String studentNo, String name, int age, Long cid) {
         this.sid = sid;
+        this.studentNo = studentNo;
         this.name = name;
         this.age = age;
         this.cid = cid;
@@ -187,5 +190,13 @@ public class Student {
                 ", cid=" + cid +
                 // ", classes=" + classes +
                 '}';
+    }
+
+    public String getStudentNo() {
+        return this.studentNo;
+    }
+
+    public void setStudentNo(String studentNo) {
+        this.studentNo = studentNo;
     }
 }

@@ -19,6 +19,7 @@ import com.eason.grade.students.Grade
 import com.eason.grade.utils.RxBus
 import com.eason.grade.utils.showToast
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.entering_fragment.*
 import java.util.*
 
@@ -26,7 +27,6 @@ import java.util.*
 class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, View.OnClickListener,
     AdapterView.OnItemSelectedListener {
     private val TAG = EnteringFragment.javaClass.name
-    override fun getLayout(): Int = R.layout.entering_fragment
     private var grade = Grade()
     private lateinit var gradeDao: GradeDao
     private lateinit var classesDao: ClassesDao
@@ -35,10 +35,11 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
     //private var students: List<Student> = mutableListOf()
     private lateinit var studentImportObserver: Observable<EventOnStudenImport>
 
-
     companion object {
         fun newInstance() = EnteringFragment()
     }
+
+    override fun getLayout(): Int = R.layout.entering_fragment
 
     @SuppressLint("SetTextI18n")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -90,18 +91,20 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
         }
 
         studentImportObserver = RxBus.get().register(EventOnStudenImport::class.java)
-        val disposable = studentImportObserver.subscribe {
-            allClasses = classesDao.loadAll().distinct()
-            allClasses.let { it1 ->
-                if (it1.isNotEmpty()) {
-                    classes_spinner?.attachDataSource(it1.map { classes -> classes.name })
-                }
+        val disposable = studentImportObserver
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                allClasses = classesDao.loadAll().distinct()
+                allClasses.let { it1 ->
+                    if (it1.isNotEmpty()) {
+                        classes_spinner?.attachDataSource(it1.map { classes -> classes.name })
+                    }
 
-                if (allClasses.isNotEmpty()) {
-                    loadAllStudents(allClasses[classes_spinner.selectedIndex])
+                    if (allClasses.isNotEmpty()) {
+                        loadAllStudents(allClasses[classes_spinner.selectedIndex])
+                    }
                 }
-            }
-        }
+            }, { t -> t.printStackTrace() })
     }
 
     override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
