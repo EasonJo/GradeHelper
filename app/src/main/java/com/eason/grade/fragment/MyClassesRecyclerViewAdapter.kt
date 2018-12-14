@@ -35,7 +35,14 @@ class MyClassesRecyclerViewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
         holder.studentName.text = item.student.name
-        holder.isRight.text = if (item.isRight) "正确" else "错误"
+        holder.isRight.text = when (item.isRight) {
+            0 -> "正确"
+            1 -> "错误"
+            -1 -> "未完成"
+            else -> {
+                "未完成"
+            }
+        }
         holder.isRead.text = if (item.isRead) "已朗读" else "未朗读"
         with(holder.mView) {
             tag = item

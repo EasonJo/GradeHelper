@@ -62,13 +62,23 @@
             app:layout_constraintBottom_toTopOf="@+id/textView3"
     >
         <RadioButton
-                android:text="正确"
+                android:text="@string/right"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/right" android:layout_weight="1"/>
+                android:layout_height="wrap_content"
+                android:id="@+id/right"
+                android:layout_weight="1"/>
         <RadioButton
-                android:text="错误"
+                android:text="@string/wrong"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/wrong" android:layout_weight="1"/>
+                android:layout_height="wrap_content"
+                android:id="@+id/wrong"
+                android:layout_weight="1"/>
+        <RadioButton
+                android:text="@string/not_complete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/not_complete"/>
     </RadioGroup>
     <RadioGroup
             android:layout_width="0dp"

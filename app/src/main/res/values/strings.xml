@@ -14,4 +14,7 @@
     <string name="cj_data">成绩单</string>
     <string name="bt_import_class_grade">导出成绩</string>
     <string name="choose_classes">班级</string>
+    <string name="right">正确</string>
+    <string name="wrong">错误</string>
+    <string name="not_complete">未完成</string>
 </resources>

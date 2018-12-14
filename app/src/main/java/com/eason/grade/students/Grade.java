@@ -33,7 +33,7 @@ public class Grade {
     /**
      * right or wrong
      */
-    private boolean isRight;
+    private int isRight = -1;
 
     /**
      * is read or not
@@ -52,18 +52,17 @@ public class Grade {
     @Generated(hash = 681281562)
     private transient GradeDao myDao;
 
-    @Generated(hash = 1858694189)
-    public Grade(Long id, Long sid, String gradeName, boolean isRight,
-                 boolean isRead) {
+    @Generated(hash = 2042976393)
+    public Grade() {
+    }
+
+    @Generated(hash = 666227939)
+    public Grade(Long id, Long sid, String gradeName, int isRight, boolean isRead) {
         this.id = id;
         this.sid = sid;
         this.gradeName = gradeName;
         this.isRight = isRight;
         this.isRead = isRead;
-    }
-
-    @Generated(hash = 2042976393)
-    public Grade() {
     }
 
     public Long getId() {
@@ -90,20 +89,20 @@ public class Grade {
         this.gradeName = gradeName;
     }
 
-    public boolean getIsRight() {
-        return this.isRight;
-    }
-
-    public void setIsRight(boolean isRight) {
-        this.isRight = isRight;
-    }
-
     public boolean getIsRead() {
         return this.isRead;
     }
 
     public void setIsRead(boolean isRead) {
         this.isRead = isRead;
+    }
+
+    public int getIsRight() {
+        return this.isRight;
+    }
+
+    public void setIsRight(int isRight) {
+        this.isRight = isRight;
     }
 
     @Generated(hash = 79695740)
@@ -130,7 +129,9 @@ public class Grade {
         return student;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1530825122)
     public void setStudent(Student student) {
         synchronized (this) {

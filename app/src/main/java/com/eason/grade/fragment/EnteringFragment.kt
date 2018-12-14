@@ -79,9 +79,7 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
             calendar.get(Calendar.DAY_OF_MONTH)
         )
 
-
         //val list = classesDao.loadAll().map { it.name }.distinct()
-
         if (allClasses.isNotEmpty()) {
             allClasses[classes_spinner.selectedIndex].students.let {
                 if (it.isNotEmpty()) {
@@ -110,10 +108,13 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
     override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
         when (checkedId) {
             R.id.right -> {
-                grade.isRight = true
+                grade.isRight = 0
             }
             R.id.wrong -> {
-                grade.isRight = false
+                grade.isRight = 1
+            }
+            R.id.not_complete -> {
+                grade.isRight = -1
             }
             R.id.read -> {
                 grade.isRead = true
@@ -162,12 +163,9 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
                     context?.showToast("成绩录入成功,成绩 ID 为: $gid")
                     //reset()
                 }
-
             }
 
             choose_date -> {
-//                date_tip.text =
-//                        "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.DAY_OF_MONTH)}"
                 dialog.show()
             }
         }
@@ -225,9 +223,19 @@ class EnteringFragment : BaseFragment(), RadioGroup.OnCheckedChangeListener, Vie
                             GradeDao.Properties.GradeName.eq(date_tip.text)
                         ).build().unique()
                     grade1?.let {
-                        val rgCheckedID = if (grade.isRight) R.id.right else R.id.wrong
+                        val rgCheckedID = when (grade.isRight) {
+                            0 -> R.id.right
+                            1 -> R.id.wrong
+                            -1 -> R.id.not_complete
+                            else -> {
+                                -1
+                            }
+                        }
+                        if (rgCheckedID != -1) {
+                            rg1.check(rgCheckedID)
+                        }
+
                         val checkedId = if (grade.isRead) R.id.read else R.id.not_read
-                        rg1.check(rgCheckedID)
                         readgroup.check(checkedId)
                         //if grade is exist,update grade
                         grade = grade1

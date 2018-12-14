@@ -196,10 +196,19 @@ class ClassesFragment : BaseFragment(), MyClassesRecyclerViewAdapter.OnListFragm
             }
 
             val objList = gradeOfClasses.map {
+                val status = when (it.isRight) {
+                    0 -> "正确"
+                    1 -> "错误"
+                    -1 -> "未完成"
+                    else -> {
+                        "未完成"
+                    }
+                }
+
                 ExcelBean(
                     it.student.studentNo,
                     it.student.name,
-                    if (it.isRight) "正确" else "错误",
+                    status,
                     if (it.isRead) "已朗读" else "未朗读"
                 )
             }.sortedBy { excelBean -> excelBean.studentNo }

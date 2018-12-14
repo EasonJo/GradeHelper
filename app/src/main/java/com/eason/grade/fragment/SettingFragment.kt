@@ -105,7 +105,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                 }
 
                 val stus = allClasses[classes_setting_spinner.selectedIndex].students.map { it.name }
-                if (stus.contains(name.toString())) {
+                if (stus.contains(name.trim())) {
                     //有重名
                     val fromHtml =
                         Html.fromHtml(
@@ -132,7 +132,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                 } else {
                     //无重名.直接录入
                     val stu = Student().apply {
-                        this.name = name.toString()
+                        this.name = name.trim().toString()
                         this.studentNo =
                                 (allClasses[classes_setting_spinner.selectedIndex].students.size + 1).toString()
 
@@ -209,7 +209,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                         //学号
                         studentNo = strings[0]
                         //姓名
-                        name = strings[1]
+                        name = strings[1].trim()
                     }
                 }
             list
