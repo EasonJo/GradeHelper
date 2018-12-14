@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">成绩统计助手</string>
+    <string name="title_home">成绩</string>
+    <string name="title_dashboard">导出</string>
+    <string name="title_notifications">设置</string>
+
+    <string name="classes_name">录入班级信息</string>
+    <string name="homework">作业</string>
+    <string name="read_title">朗读</string>
+    <string name="is_read">已朗读</string>
+    <string name="not_read">未朗读</string>
+
+    <string name="tips">第一步:如果没有班级,请先录入班级\n第二步:选择班级,导入学生,如果没有班级,请在最上面手动录入一个班级.\nExcel的格式必须正确.否则会导致解析失败.</string>
+</resources>
