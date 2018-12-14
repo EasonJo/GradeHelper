@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -296,42 +297,50 @@ public class ExcelUtils {
             evtType = xmlParser.next();
         }
         ZipEntry sheetXML = xlsxFile.getEntry("xl/worksheets/sheet" + (sheet + 1) + ".xml");
-        InputStream inputStreamsheet = xlsxFile.getInputStream(sheetXML);
-        XmlPullParser xmlParsersheet = Xml.newPullParser();
-        xmlParsersheet.setInput(inputStreamsheet, "utf-8");
-        int evtTypesheet = xmlParsersheet.getEventType();
-        while (evtTypesheet != XmlPullParser.END_DOCUMENT) {
-            switch (evtTypesheet) {
+        InputStream inputStreamSheet = xlsxFile.getInputStream(sheetXML);
+        XmlPullParser xmlParserSheet = Xml.newPullParser();
+        xmlParserSheet.setInput(inputStreamSheet, "utf-8");
+        int evtTypeSheet = xmlParserSheet.getEventType();
+        while (evtTypeSheet != XmlPullParser.END_DOCUMENT) {
+            switch (evtTypeSheet) {
                 case XmlPullParser.START_TAG:
-                    String tag = xmlParsersheet.getName();
+                    String tag = xmlParserSheet.getName();
                     if (tag.equalsIgnoreCase("row")) {
                     } else if (tag.equalsIgnoreCase("c")) {
-                        String t = xmlParsersheet.getAttributeValue(null, "t");
+                        String t = xmlParserSheet.getAttributeValue(null, "t");
                         if (t != null) {
                             flat = true;
                         } else {
                             flat = false;
                         }
                     } else if (tag.equalsIgnoreCase("v")) {
-                        v = xmlParsersheet.nextText();
+                        v = xmlParserSheet.nextText();
                         if (v != null) {
                             if (flat) {
                                 item.add(ls.get(Integer.parseInt(v)));
                             } else {
-                                item.add(v);
+                                if (v.endsWith(".0")) {
+                                    //解决接续数据后面有.0的情况,比如 1.0  2.0 等等
+                                    BigDecimal one = new BigDecimal(Double.valueOf(v));
+                                    String s = one.toPlainString();
+                                    item.add(s);
+                                } else {
+                                    item.add(v);
+                                }
                             }
                         }
                     }
                     break;
                 case XmlPullParser.END_TAG:
-                    if (xmlParsersheet.getName().equalsIgnoreCase("row")
-                            && v != null) {
+                    if (xmlParserSheet.getName().equalsIgnoreCase("row") && v != null) {
                         list.add(item.toArray(new String[item.size()]));
-                        item = new ArrayList<String>();
+                        item = new ArrayList<>();
                     }
                     break;
+                default:
+                    break;
             }
-            evtTypesheet = xmlParsersheet.next();
+            evtTypeSheet = xmlParserSheet.next();
         }
         return list;
     }

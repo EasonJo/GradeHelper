@@ -180,7 +180,6 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
         startActivityForResult(intent, 1)
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == RESULT_OK && data != null) {
             Log.e(TAG, "选择的文件Uri = " + data.toString());
@@ -199,12 +198,11 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
     }
 
     private fun parseAllStudentsFromExcel(filePath: String) {
-//        val classes = Classes().apply {
-//            name = File(filePath).name.substringBefore(".")
-//        }
         val disposable = Observable.fromCallable {
-            val list = ExcelUtils.readExcel(filePath, 0).filter { t ->
-                t.size >= 2 && t[0].isNumber() && !TextUtils.isEmpty(t[1])
+
+            val excelData = ExcelUtils.readExcel(filePath, 0)
+            val list = excelData.filter { t ->
+                t.size >= 2 && t[0].trim().isNumber() && !TextUtils.isEmpty(t[1])
             }
                 .map { strings ->
                     Student().apply {
@@ -219,8 +217,15 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                info.append("Excel 解析成功\n")
-                context?.showToast("Excel 解析成功")
+
+                info.text = emptyString
+                info.append("Excel解析完毕,总共解析到${it.size}条数据\n")
+                context?.showToast("Excel解析完毕,总共解析到${it.size}条数据")
+
+                if (it.isEmpty()) {
+                    return@subscribe
+                }
+
                 val chooseClass = allClasses[classes_setting_spinner.selectedIndex]
                 val students1 = chooseClass.students
                 val fromHtml = if (students1.isNotEmpty())
@@ -230,7 +235,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                     )
                 else
                     Html.fromHtml(
-                        "此学生信息将录入以下班级<br><font color='#ff0000'><big><big>${chooseClass.name}</big></big></font><br>录入请点确认,将插入数据库." +
+                        "<font color='#ff0000'><big><big>${it.size}</big></big></font>条学生信息将录入以下班级<br><font color='#ff0000'><big><big>${chooseClass.name}</big></big></font><br>录入请点确认,将插入数据库." +
                                 "请勿选错班级,否则会导致学生班级信息全部变更"
                     )
 
@@ -249,7 +254,7 @@ class SettingFragment : BaseFragment(), View.OnClickListener, AdapterView.OnItem
                         it.forEach { t: Student -> t.cid = chooseClass.id }
                         studentDao.insertOrReplaceInTx(it)
                         updateStudentsOfClass2InputView(chooseClass)
-                        info.text = emptyString
+                        //info.text = emptyString
                         insert_stu_name.setText(emptyString)
                         info.append("用户数据导入成功\n")
                         context?.showToast("用户数据导入成功")
